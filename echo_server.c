@@ -32,10 +32,14 @@ static int get_request(struct socket *sock, unsigned char *buf, size_t size)
      * TODO: during benchmarking, such printk() is useless and lead to worse
      * result. Add a specific build flag for these printk() would be good.
      */
+#ifndef BENCH
     printk(MODULE_NAME ": start get response\n");
+#endif
     /* get msg */
     length = kernel_recvmsg(sock, &msg, &vec, size, size, msg.msg_flags);
+#ifndef BENCH
     printk(MODULE_NAME ": get request = %s\n", buf);
+#endif
 
     return length;
 }
@@ -55,11 +59,15 @@ static int send_request(struct socket *sock, unsigned char *buf, size_t size)
     vec.iov_base = buf;
     vec.iov_len = strlen(buf);
 
+#ifndef BENCH
     printk(MODULE_NAME ": start send request.\n");
+#endif
 
     length = kernel_sendmsg(sock, &msg, &vec, 1, size);
 
+#ifndef BENCH
     printk(MODULE_NAME ": send request = %s\n", buf);
+#endif
 
     return length;
 }

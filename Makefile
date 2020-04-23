@@ -9,6 +9,10 @@ kecho-objs := \
 
 obj-m += drop-tcp-socket.o
 
+ifeq ("$(BENCH)", "1")
+	ccflags-y += -DBENCH
+endif
+
 GIT_HOOKS := .git/hooks/applied
 all: $(GIT_HOOKS) bench user-echo-server
 	make -C $(KDIR) M=$(PWD) KBUILD_VERBOSE=$(VERBOSE) modules
