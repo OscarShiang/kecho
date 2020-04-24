@@ -42,7 +42,7 @@ for FILE in $FILES; do
 done
 
 # static analysis
-$CPPCHECK $CPPCHECK_OPTS >/dev/null
+$CPPCHECK $CPPCHECK_OPTS>/dev/null
 if [ $? -ne 0 ]; then
     RETURN=1
     echo "" >&2

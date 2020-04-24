@@ -49,7 +49,7 @@ static int send_request(struct socket *sock, unsigned char *buf, size_t size)
 
     printk(MODULE_NAME ": start send request.\n");
 
-    length = kernel_sendmsg(sock, &msg, &vec, 1, strlen(buf) - 1);
+    length = kernel_sendmsg(sock, &msg, &vec, 1, size);
 
     printk(MODULE_NAME ": send request = %s\n", buf);
 
@@ -66,7 +66,7 @@ static int echo_server_worker(void *arg)
     allow_signal(SIGKILL);
     allow_signal(SIGTERM);
 
-    buf = kmalloc(BUF_SIZE, GFP_KERNEL);
+    buf = kzalloc(BUF_SIZE, GFP_KERNEL);
     if (!buf) {
         printk(KERN_ERR MODULE_NAME ": kmalloc error....\n");
         return -1;
@@ -81,7 +81,7 @@ static int echo_server_worker(void *arg)
             break;
         }
 
-        res = send_request(sock, buf, strlen(buf));
+        res = send_request(sock, buf, res);
         if (res < 0) {
             printk(KERN_ERR MODULE_NAME ": send request error = %d\n", res);
             break;
@@ -89,7 +89,7 @@ static int echo_server_worker(void *arg)
     }
 
     res = get_request(sock, buf, BUF_SIZE - 1);
-    res = send_request(sock, buf, strlen(buf));
+    res = send_request(sock, buf, res);
 
     kernel_sock_shutdown(sock, SHUT_RDWR);
     sock_release(sock);
