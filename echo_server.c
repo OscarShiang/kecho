@@ -24,10 +24,14 @@ static int get_request(struct socket *sock, unsigned char *buf, size_t size)
     msg.msg_controllen = 0;
     msg.msg_flags = 0;
 
+#ifndef BENCH
     printk(MODULE_NAME ": start get response\n");
+#endif
     /* get msg */
     length = kernel_recvmsg(sock, &msg, &vec, size, size, msg.msg_flags);
+#ifndef BENCH
     printk(MODULE_NAME ": get request = %s\n", buf);
+#endif
 
     return length;
 }
@@ -47,12 +51,15 @@ static int send_request(struct socket *sock, unsigned char *buf, size_t size)
     vec.iov_base = buf;
     vec.iov_len = strlen(buf);
 
+#ifndef BENCH
     printk(MODULE_NAME ": start send request.\n");
+#endif
 
     length = kernel_sendmsg(sock, &msg, &vec, 1, size);
 
+#ifndef BENCH
     printk(MODULE_NAME ": send request = %s\n", buf);
-
+#endif
     return length;
 }
 
@@ -98,6 +105,20 @@ static int echo_server_worker(void *arg)
     return 0;
 }
 
+void test_end(void)
+{
+    return;
+}
+
+noinline struct task_struct *my_thread_run(int (*thread_fn)(void *),
+                                           void *sock,
+                                           char *name)
+{
+    struct task_struct *task = kthread_run(thread_fn, sock, name);
+    test_end();
+    return task;
+}
+
 int echo_server_daemon(void *arg)
 {
     struct echo_server_param *param = arg;
@@ -119,7 +140,7 @@ int echo_server_daemon(void *arg)
         }
 
         /* start server worker */
-        thread = kthread_run(echo_server_worker, sock, MODULE_NAME);
+        thread = my_thread_run(echo_server_worker, sock, MODULE_NAME);
         if (IS_ERR(thread)) {
             printk(KERN_ERR MODULE_NAME ": create worker thread error = %d\n",
                    error);

@@ -9,6 +9,10 @@ GIT_HOOKS := .git/hooks/applied
 obj-m := fastecho.o
 fastecho-objs := $(SRCS:.c=.o)
 
+ifeq ("$(BENCH)", "1")
+    ccflags-y += -DBENCH
+endif
+
 all: $(GIT_HOOKS) fastecho.ko bench user-echo-server
 	
 $(GIT_HOOKS):
